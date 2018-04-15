@@ -117,6 +117,10 @@ namespace Microsoft.Azure.SignalR
                         break;
                 }
             }
+            else
+            {
+                _messageCounters.AddPingCount(1);
+            }
             // ignore ping
         }
 
