@@ -6,8 +6,12 @@
 
         void AddOutgoingMessageCount(long messageCount);
 
+        void AddPingCount(long messageCount);
+
         long GetIncomingMessageCount();
 
         long GetOutgoingMessageCount();
+
+        long GetPingCount();
     }
 }

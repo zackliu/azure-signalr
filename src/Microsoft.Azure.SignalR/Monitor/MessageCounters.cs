@@ -6,6 +6,7 @@ namespace Microsoft.Azure.SignalR
     {
         private long _incomingMessageCounter;
         private long _outgoingMessageCounter;
+        private long _pingCounter;
 
         public void AddIncomingMessageCount(long messageCount)
         {
@@ -17,6 +18,11 @@ namespace Microsoft.Azure.SignalR
             Interlocked.Add(ref _outgoingMessageCounter, messageCount);
         }
 
+        public void AddPingCount(long messageCount)
+        {
+            Interlocked.Add(ref _pingCounter, messageCount);
+        }
+
         public long GetIncomingMessageCount()
         {
             return Interlocked.Read(ref _incomingMessageCounter);
@@ -25,6 +31,11 @@ namespace Microsoft.Azure.SignalR
         public long GetOutgoingMessageCount()
         {
             return Interlocked.Read(ref _outgoingMessageCounter);
+        }
+
+        public long GetPingCount()
+        {
+            return Interlocked.Read(ref _pingCounter);
         }
     }
 }
