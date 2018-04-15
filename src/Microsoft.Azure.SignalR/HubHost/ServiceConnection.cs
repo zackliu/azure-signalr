@@ -19,16 +19,19 @@ namespace Microsoft.Azure.SignalR
         private IClientConnectionManager _clientConnectionManager;
         private ConnectionDelegate _connectionDelegate;
         private SemaphoreSlim _serviceConnectionLock = new SemaphoreSlim(1, 1);
+        private IMessageCounters _messageCounters;
         private readonly ILogger<ServiceConnection> _logger;
 
         public static TimeSpan HandshakeTimeout { get; set; } = DefaultHandshakeTimeout;
 
         public ServiceConnection(IClientConnectionManager clientConnectionManager,
-            Uri serviceUrl, HttpConnection httpConnection, ILoggerFactory loggerFactory)
+            Uri serviceUrl, HttpConnection httpConnection,
+            ILoggerFactory loggerFactory, IMessageCounters messageCounters)
         {
             _clientConnectionManager = clientConnectionManager;
             _httpConnection = httpConnection;
             _logger = loggerFactory.CreateLogger<ServiceConnection>();
+            _messageCounters = messageCounters;
         }
         
         public async Task StartAsync(ConnectionDelegate connectionDelegate)
@@ -50,6 +53,7 @@ namespace Microsoft.Azure.SignalR
                 // Write the service protocol message
                 ServiceProtocol.WriteMessage(serviceMessage, _httpConnection.Transport.Output);
                 await _httpConnection.Transport.Output.FlushAsync(CancellationToken.None);
+                _messageCounters.AddOutgoingMessageCount(1);
                 _logger.LogDebug("Send messge to service");
             }
             finally
@@ -97,6 +101,7 @@ namespace Microsoft.Azure.SignalR
         private async Task DispatchMessage(ServiceMessage message)
         {
             _logger.LogDebug($"mesage command {message.Command}");
+            _messageCounters.AddIncomingMessageCount(1);
             if (message.Command != CommandType.Ping)
             {
                 switch (message.Command)

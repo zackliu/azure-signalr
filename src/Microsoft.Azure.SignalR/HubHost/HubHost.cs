@@ -23,13 +23,15 @@ namespace Microsoft.Azure.SignalR
         private IConnectionServiceProvider _connectionServiceProvider;
         private IServiceConnectionManager _serviceConnectionManager;
         private IClientConnectionManager _clientConnectionManager;
+        private IMessageCounters _messageCounters;
         private readonly string _name = $"HubHost<{typeof(THub).FullName}>";
 
         public HubHost(IServiceConnectionManager serviceConnectionManager,
             IClientConnectionManager clientConnectionManager,
             IConnectionServiceProvider connectionServiceProvider,
             IOptions<ServiceOptions> options,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory,
+            IMessageCounters messageCounters)
         {
             _serviceConnectionManager = serviceConnectionManager;
             _clientConnectionManager = clientConnectionManager;
@@ -38,6 +40,7 @@ namespace Microsoft.Azure.SignalR
 
             _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             _logger = loggerFactory.CreateLogger<HubHost<THub>>();
+            _messageCounters = messageCounters;
         }
 
         internal void Configure()
@@ -71,7 +74,7 @@ namespace Microsoft.Azure.SignalR
         private ServiceConnection CreateServiceConnection(Uri serviceUrl, HttpOptions httpOptions)
         {
             var httpConnection = new HttpConnection(serviceUrl, HttpTransportType.WebSockets, _loggerFactory, httpOptions);
-            return new ServiceConnection(_clientConnectionManager, serviceUrl, httpConnection, _loggerFactory);
+            return new ServiceConnection(_clientConnectionManager, serviceUrl, httpConnection, _loggerFactory, _messageCounters);
         }
     }
 }

@@ -24,6 +24,7 @@ namespace Microsoft.Extensions.DependencyInjection
             builder.Services.AddSingleton(typeof(IConnectionServiceProvider), typeof(ConnectionServiceProvider));
             builder.Services.AddSingleton(typeof(HubHost<>));
             builder.Services.AddSingleton(typeof(IHubMessageSender), typeof(HubMessageSender));
+            builder.Services.AddSingleton(typeof(IMessageCounters), typeof(MessageCounters));
             return builder;
         }
     }
