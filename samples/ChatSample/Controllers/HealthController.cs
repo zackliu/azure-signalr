@@ -25,6 +25,7 @@ namespace ChatSample
                 {
                     IncomingMessage = _messageCounters.GetIncomingMessageCount(),
                     OutgoingMessage = _messageCounters.GetOutgoingMessageCount(),
+                    IncomingMessageItems = _messageCounters.GetIncomingMessageItemsCount(),
                     PingMessage = _messageCounters.GetPingCount()
                 });
         }
