@@ -102,6 +102,7 @@ namespace Microsoft.Azure.SignalR
         private async Task DispatchMessage(ServiceMessage message)
         {
             _logger.LogDebug($"mesage command {message.Command}");
+            _messageCounters.AddIncomingMessageItemsCount(1);
             if (message.Command != CommandType.Ping)
             {
                 switch (message.Command)
