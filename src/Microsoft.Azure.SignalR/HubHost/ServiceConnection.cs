@@ -74,6 +74,7 @@ namespace Microsoft.Azure.SignalR
                     if (!buffer.IsEmpty)
                     {
                         _logger.LogDebug("message received from service");
+                        _messageCounters.AddIncomingMessageCount(1);
                         while (ServiceProtocol.TryParseMessage(ref buffer, out ServiceMessage message))
                         {
                             await DispatchMessage(message);
@@ -101,7 +102,6 @@ namespace Microsoft.Azure.SignalR
         private async Task DispatchMessage(ServiceMessage message)
         {
             _logger.LogDebug($"mesage command {message.Command}");
-            _messageCounters.AddIncomingMessageCount(1);
             if (message.Command != CommandType.Ping)
             {
                 switch (message.Command)
