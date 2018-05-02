@@ -22,7 +22,10 @@ namespace ChatSample
         {
             services.AddMvc();
             services.AddSignalR()
-                    .AddAzureSignalR();
+		    .AddAzureSignalR(option =>
+                    {
+                        option.ConnectionCount = Configuration.GetValue<int>("Azure:SignalR:ConnectionNumber");
+                    });
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
