@@ -16,9 +16,9 @@ SET NugetServerUrl=https://www.myget.org/F/azure-signalr-dev/api/v2/package
 
 PUSHD %~dp0
 
-CALL ./build.cmd /p:BuildNumber=%BuildNumber%
+CALL ./pack.cmd %BuildNumber%
 
-CD ./artifacts/build
+CD ./.publish
 CALL dotnet nuget push *.nupkg -k %ApiKey% -s %NugetServerUrl%
 
 POPD
