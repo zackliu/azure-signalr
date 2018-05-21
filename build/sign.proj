@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Sign" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="SignFiles" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
     <NuGetPackageRoot Condition="'$(NuGetPackageRoot)' == ''">$(NUGET_PACKAGES)</NuGetPackageRoot> <!-- Respect environment variable if set -->
@@ -20,15 +20,9 @@
 
 
   <Target Name="_GetSignPackages">
-    <PropertyGroup>
-      <!-- The OutDir and IntermediateOutputPath properties are required by MicroBuild. MicroBuild only
-           signs files that are under these paths. -->
-      <OutDir>$(Root)\</OutDir>
-    </PropertyGroup>
-  
     <ItemGroup>
       <!-- Adding the assemblies to sign -->
-      <FilesToSign Include="$(OutDir)artifacts\build\*.nupkg">
+      <FilesToSign Include="..\artifacts\build\*.nupkg">
         <Authenticode>NuGet</Authenticode>
       </FilesToSign>
     </ItemGroup>
