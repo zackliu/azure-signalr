@@ -2,10 +2,9 @@
 <Project DefaultTargets="SignPackages" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <NuGetPackageRoot Condition="'$(NuGetPackageRoot)' == ''">$(NUGET_PACKAGES)</NuGetPackageRoot> <!-- Respect environment variable if set -->
     <NuGetPackageRoot Condition="'$(NuGetPackageRoot)' == ''">$(UserProfile)\.nuget\packages</NuGetPackageRoot>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
-    <MicroBuildPropsAndTargetsPath>$(NuGetPackageRoot)/microbuild.core/$(MicroBuildVersion)/build/</MicroBuildPropsAndTargetsPath>
+    <MicroBuildPropsAndTargetsPath>$(NuGetPackageRoot)\microbuild.core\$(MicroBuildVersion)\build\</MicroBuildPropsAndTargetsPath>
   </PropertyGroup>
   
   <Import Project="..\Directory.Build.props" />
