@@ -8,7 +8,8 @@
     <MicroBuildPropsAndTargetsPath>$(NuGetPackageRoot)/microbuild.core/$(MicroBuildVersion)/build/</MicroBuildPropsAndTargetsPath>
   </PropertyGroup>
   
-  <Import Project="$(MicroBuildPropsAndTargetsPath)MicroBuild.Core.props" Condition="Exists('$(MicroBuildPropsAndTargetsPath)MicroBuild.Core.props')" />
+  <Import Project="..\Directory.Build.props" />
+  <Import Project="$(MicroBuildPropsAndTargetsPath)MicroBuild.Core.props" />
 
   <!-- This will be overridden if we're building with MicroBuild. -->
 
@@ -20,11 +21,11 @@
   <Target Name="_GetSignPackages">
     <ItemGroup>
       <!-- Adding the assemblies to sign -->
-      <FilesToSign Include="..\artifacts\build\*.nupkg">
+      <FilesToSign Include="$(RepositoryRoot)artifacts\build\*.nupkg">
         <Authenticode>NuGet</Authenticode>
       </FilesToSign>
     </ItemGroup>
   </Target>
 
-  <Import Project="$(MicroBuildPropsAndTargetsPath)MicroBuild.Core.targets" Condition="Exists('$(MicroBuildPropsAndTargetsPath)MicroBuild.Core.targets')" />
+  <Import Project="$(MicroBuildPropsAndTargetsPath)MicroBuild.Core.targets" />
 </Project>
