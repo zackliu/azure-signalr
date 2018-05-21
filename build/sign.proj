@@ -19,9 +19,16 @@
   <Target Name="SignPackages" DependsOnTargets="_GetSignPackages;SignFiles" />
   
   <Target Name="_GetSignPackages">
+    <PropertyGroup>
+      <!-- The OutDir and IntermediateOutputPath properties are required by MicroBuild. MicroBuild only
+           signs files that are under these paths. -->
+      <OutDir>$(RepositoryRoot)\</OutDir>
+      <IntermediateOutputPath>$(RepositoryRoot)\artifacts\build</IntermediateOutputPath>
+    </PropertyGroup>
+    
     <ItemGroup>
       <!-- Adding the assemblies to sign -->
-      <FilesToSign Include="..\artifacts\**\*.nupkg">
+      <FilesToSign Include="$(OutDir)artifacts\build\*.nupkg">
         <Authenticode>NuGet</Authenticode>
       </FilesToSign>
     </ItemGroup>
