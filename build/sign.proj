@@ -2,9 +2,9 @@
 <Project DefaultTargets="SignPackages" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <NuGetPackageRoot Condition="'$(NuGetPackageRoot)' == ''">$(UserProfile)\.nuget\packages</NuGetPackageRoot>
+    <NuGetPackageRoot Condition="'$(NuGetPackageRoot)' == ''">$(UserProfile)\.nuget\packages\</NuGetPackageRoot>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
-    <MicroBuildPropsAndTargetsPath>$(NuGetPackageRoot)\microbuild.core\$(MicroBuildVersion)\build\</MicroBuildPropsAndTargetsPath>
+    <MicroBuildPropsAndTargetsPath>$(NuGetPackageRoot)microbuild.core\$(MicroBuildVersion)\build\</MicroBuildPropsAndTargetsPath>
   </PropertyGroup>
   
   <Import Project="..\Directory.Build.props" />
@@ -13,14 +13,10 @@
   <!-- This will be overridden if we're building with MicroBuild. -->
 
 
-
-  <Target Name="SignPackages" DependsOnTargets="_GetSignPackages" />
-
-
-  <Target Name="_GetSignPackages">
+  <Target Name="SignPackages">
     <ItemGroup>
       <!-- Adding the assemblies to sign -->
-      <FilesToSign Include="$(RepositoryRoot)artifacts\build\*.nupkg">
+      <FilesToSign Include="..\artifacts\build\*.nupkg">
         <Authenticode>NuGet</Authenticode>
       </FilesToSign>
     </ItemGroup>
