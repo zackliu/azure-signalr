@@ -1,22 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="SignPackages" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="SignFiles" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <Import Project="..\MicroBuild.Core.props" />
+  
   <PropertyGroup>
-    <NuGetPackageRoot Condition="'$(NuGetPackageRoot)' == ''">$(UserProfile)\.nuget\packages\</NuGetPackageRoot>
-    <MicroBuildVersion>0.2.0</MicroBuildVersion>
-    <MicroBuildPropsAndTargetsPath>$(NuGetPackageRoot)microbuild.core\$(MicroBuildVersion)\build\</MicroBuildPropsAndTargetsPath>
+    <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepositoryRoot)/.nuget/packages</NuGetPackagesDir>
+    <MicroBuildCorePackageVersion>0.2.0</MicroBuildCorePackageVersion>
+    <MicroBuildPropsAndTargetsPath>$(NuGetPackagesDir)/microbuild.core/$(MicroBuildCorePackageVersion)/build/</MicroBuildPropsAndTargetsPath>    
   </PropertyGroup>
   
-  <Import Project="..\Directory.Build.props" />
   <Import Project="$(MicroBuildPropsAndTargetsPath)MicroBuild.Core.props" />
 
   <!-- This will be overridden if we're building with MicroBuild. -->
+  <Target Name="SignFiles">
+    <Message Text="Fake sign target.  Would sign: @(FilesToSign)" />
+  </Target>
 
-
-  <Target Name="SignPackages">
+  <Target Name="SignPackages" DependsOnTargets="_GetSignPackages;SignFiles" />
+  
+  <Target Name="_GetSignPackages">
     <ItemGroup>
       <!-- Adding the assemblies to sign -->
-      <FilesToSign Include="..\artifacts\build\*.nupkg">
+      <FilesToSign Include="..\artifacts\**\*.nupkg">
         <Authenticode>NuGet</Authenticode>
       </FilesToSign>
     </ItemGroup>
