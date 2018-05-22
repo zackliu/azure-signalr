@@ -4,9 +4,9 @@
   <Import Project="..\Directory.Build.props" />
   
   <PropertyGroup>
-    <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(UserProfile)/.nuget/packages</NuGetPackagesDir>
+    <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(UserProfile)\.nuget\packages</NuGetPackagesDir>
     <MicroBuildCorePackageVersion>0.2.0</MicroBuildCorePackageVersion>
-    <MicroBuildPropsAndTargetsPath>$(NuGetPackagesDir)/microbuild.core/$(MicroBuildCorePackageVersion)/build/</MicroBuildPropsAndTargetsPath>    
+    <MicroBuildPropsAndTargetsPath>$(NuGetPackagesDir)\microbuild.core\$(MicroBuildCorePackageVersion)\build\</MicroBuildPropsAndTargetsPath>    
   </PropertyGroup>
   
   <Import Project="$(MicroBuildPropsAndTargetsPath)MicroBuild.Core.props" />
