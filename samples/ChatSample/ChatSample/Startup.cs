@@ -23,7 +23,7 @@ namespace ChatSample
         {
             services.AddMvc();
             services.AddSignalR()
-                    .AddAzureSignalR();
+                    .AddAzureSignalR(options => options.ConnectionCount = 1);
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -33,7 +33,6 @@ namespace ChatSample
             app.UseAzureSignalR(routes =>
             {
                 routes.MapHub<Chat>("/chat");
-                routes.MapHub<NotificationHub>("/notifications");
             });
         }
     }

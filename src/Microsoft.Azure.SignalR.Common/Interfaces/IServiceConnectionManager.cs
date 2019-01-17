@@ -9,5 +9,7 @@ namespace Microsoft.Azure.SignalR
         IEnumerable<IServiceConnection> CreateServiceConnection(int count = 1);
 
         void DisposeServiceConnection(IServiceConnection connection);
+
+
     }
 }
