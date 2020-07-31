@@ -19,6 +19,7 @@ namespace ChatSample.CoreApp3
                 {
                     option.GracefulShutdown.Mode = GracefulShutdownMode.WaitForClientsClose;
                     option.GracefulShutdown.Timeout = TimeSpan.FromSeconds(10);
+                    option.ConnectionCount = 0;
                 })
                 .AddMessagePackProtocol();
         }

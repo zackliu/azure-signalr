@@ -387,7 +387,7 @@ namespace Microsoft.Azure.SignalR
             {
                 // cancel the application task, to end the outgoing task
                 connection.Application.Input.CancelPendingRead();
-                throw new AzureSignalRException("Cancelled running application task, probably caused by time out.");
+                // throw new AzureSignalRException("Cancelled running application task, probably caused by time out.");
             }
         }
 

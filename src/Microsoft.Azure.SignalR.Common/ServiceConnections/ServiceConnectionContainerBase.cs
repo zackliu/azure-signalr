@@ -432,6 +432,11 @@ namespace Microsoft.Azure.SignalR
 
         private Task WriteToRandomAvailableConnection(ServiceMessage serviceMessage)
         {
+            if (FixedConnectionCount == 0)
+            {
+                return Task.CompletedTask;
+            }
+
             return WriteWithRetry(serviceMessage, StaticRandom.Next(-FixedConnectionCount, FixedConnectionCount), FixedConnectionCount);
         }
 

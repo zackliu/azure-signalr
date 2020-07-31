@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -10,66 +12,107 @@ namespace ChatSample.CSharpClient
 {
     class Program
     {
-        static async Task Main(string[] args)
+        private static SemaphoreSlim _barrier;
+        private static int GroupSendIntervalInMilliseconds = 50000;
+        private static int ConnectionTtlSeconds = 200;
+        private static int _total = 1;
+        private static long _current = 0;
+        private static long _count = 0;
+        private static string _errorFile;
+        static void Main(string[] args)
         {
             var url = "http://localhost:5050";
-            var proxy = await ConnectAsync(url + "/chat", Console.Out);
-            var currentUser = Guid.NewGuid().ToString("N");
+            _total = args.Length > 0 && int.TryParse(args[0], out var total) ? total : 1;
+            var conc = args.Length > 1 && int.TryParse(args[1], out var concurrency) ? concurrency : 20;
+            _errorFile = $"error_{DateTime.Now}.log";
+            _barrier = new SemaphoreSlim(conc);
 
-            Mode mode = Mode.Broadcast;
-            if (args.Length > 0)
+            while (Interlocked.Read(ref _count) < _total)
             {
-                Enum.TryParse(args[0], true, out mode);
+                Console.WriteLine(Interlocked.Read(ref _count) + ": " + _total);
+                var index = _current++;
+                var currentUser = "user" + index;
+                Interlocked.Increment(ref _count);
+                _ = StartConnection(url, currentUser);
             }
+            Console.ReadLine();
+        }
 
-            Console.WriteLine($"Logged in as user {currentUser}");
-            var input = Console.ReadLine();
-            while (!string.IsNullOrEmpty(input))
+        private static async Task StartConnection(string url, string currentUser)
+        {
+            await _barrier.WaitAsync();
+            try
             {
-                switch (mode)
-                {
-                    case Mode.Broadcast:
-                        await proxy.InvokeAsync("BroadcastMessage", currentUser, input);
-                        break;
-                    case Mode.Echo:
-                        await proxy.InvokeAsync("echo", input);
-                        break;
-                    default:
-                        break;
-                }
-
-                input = Console.ReadLine();
+                var proxy = await ConnectAsync(url + "/chat", currentUser, Console.Out);
+                var token = new CancellationTokenSource(TimeSpan.FromSeconds(StaticRandom.Next(ConnectionTtlSeconds, ConnectionTtlSeconds + 200)));
+                _ = StartSendLoop(proxy, currentUser, 10, token.Token);
+            }
+            finally
+            {
+                _barrier.Release();
             }
         }
 
-        private static async Task<HubConnection> ConnectAsync(string url, TextWriter output, CancellationToken cancellationToken = default)
+        private static async Task StartSendLoop(HubConnection proxy, string currentUser, int length, CancellationToken cancellation)
         {
+            while (!cancellation.IsCancellationRequested)
+            {
+                var str = Stopwatch.GetTimestamp().ToString();
+                var content = string.Join(':', Enumerable.Repeat<string>(str, length));
+                try
+                {
+                    await proxy.InvokeAsync("GroupSend", currentUser, content);
+                }catch(Exception e)
+                {
+                    Console.WriteLine($"{DateTime.Now}: User {currentUser}, {e.Message}");
+                }
+                await Task.Delay(GroupSendIntervalInMilliseconds);
+            }
+
+            await proxy.StopAsync();
+        }
+
+        private static async Task<HubConnection> ConnectAsync(string url, string user, TextWriter output, CancellationToken cancellationToken = default)
+        {
+            var startT = DateTime.Now;
             var connection = new HubConnectionBuilder()
                 .WithUrl(url)
                 .AddMessagePackProtocol().Build();
-
-            connection.On<string, string>("BroadcastMessage", BroadcastMessage);
-            connection.On<string>("Echo", Echo);
-
+            
+            connection.On<string, string>("broadcastMessage", BroadcastMessage);
+            connection.On<string, string>("echo", Echo);
             connection.Closed += async (e) =>
             {
-                output.WriteLine(e);
-                await DelayRandom(200, 1000);
-                await StartAsyncWithRetry(connection, output, cancellationToken);
+                var elapsed = (DateTime.Now - startT).TotalSeconds;
+                var log = $"time: {DateTime.Now}, connId: {connection.ConnectionId}, user: {user}, elapsed seconds: {elapsed}, error: {e.Message} \n";
+                await File.AppendAllTextAsync(_errorFile, log);
+                output.WriteLine(log);
+                Interlocked.Decrement(ref _count);
+                if (e != null)
+                {
+                    output.WriteLine(e);
+                    // await DelayRandom(200, 1000);
+                    // await StartAsyncWithRetry(connection, user, output, cancellationToken);
+                }
+                else
+                {
+                    Interlocked.Decrement(ref _count);
+                }
             };
 
-            await StartAsyncWithRetry(connection, output, cancellationToken);
+            await StartAsyncWithRetry(connection, user, output, cancellationToken);
 
             return connection;
         }
 
-        private static async Task StartAsyncWithRetry(HubConnection connection, TextWriter output, CancellationToken cancellationToken)
+        private static async Task StartAsyncWithRetry(HubConnection connection, string user, TextWriter output, CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)
             {
                 try
                 {
                     await connection.StartAsync(cancellationToken);
+                    output.WriteLine($"{user}[{connection.ConnectionId}] started");
                     return;
                 }
                 catch (Exception e)
@@ -96,9 +139,9 @@ namespace ChatSample.CSharpClient
             Console.WriteLine($"{name}: {message}");
         }
 
-        private static void Echo(string message)
+        private static void Echo(string name, string message)
         {
-            Console.WriteLine(message);
+            Console.WriteLine($"{name}: {message}");
         }
 
         private enum Mode

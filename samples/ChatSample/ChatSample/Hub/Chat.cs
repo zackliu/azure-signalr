@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Azure.SignalR;
@@ -20,6 +22,16 @@ namespace ChatSample.CoreApp3
         {
             Clients.Client(Context.ConnectionId).SendAsync("echo", name, $"{message} (echo from server, Client IP: {Context.GetHttpContext().Connection.RemoteIpAddress})");
             Console.WriteLine("Echo...");
+        }
+
+        public async Task GroupSend(string name, string message)
+        {
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            await Groups.AddToGroupAsync(Context.ConnectionId, name);
+            await Clients.Group(name).SendAsync("echo", name, message);
+            stopWatch.Stop();
+            Console.WriteLine($"{name} group send: {stopWatch.ElapsedMilliseconds} ms");
         }
 
         public override async Task OnConnectedAsync()
