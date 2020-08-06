@@ -15,33 +15,34 @@ namespace ChatSample.CoreApp3
         public void BroadcastMessage(string name, string message)
         {
             Clients.All.SendAsync("broadcastMessage", name, message);
-            Console.WriteLine("Broadcasting...");
+            //Console.WriteLine("Broadcasting...");
         }
 
         public void Echo(string name, string message)
         {
             Clients.Client(Context.ConnectionId).SendAsync("echo", name, $"{message} (echo from server, Client IP: {Context.GetHttpContext().Connection.RemoteIpAddress})");
-            Console.WriteLine("Echo...");
+            //Console.WriteLine("Echo...");
         }
 
-        public async Task GroupSend(string name, string message)
+        public async Task GroupSend(string name, string message, long timestamp)
         {
             var stopWatch = new Stopwatch();
             stopWatch.Start();
-            await Groups.AddToGroupAsync(Context.ConnectionId, name);
-            await Clients.Group(name).SendAsync("echo", name, message);
+            //await Groups.AddToGroupAsync(Context.ConnectionId, name);
+            //await Clients.Group(name).SendAsync("echo", name, message);
+            await Clients.Clients(Context.ConnectionId).SendAsync("echo", name, message, timestamp);
             stopWatch.Stop();
-            Console.WriteLine($"{name} group send: {stopWatch.ElapsedMilliseconds} ms");
+            //Console.WriteLine($"{name} group send: {stopWatch.ElapsedMilliseconds} ms");
         }
 
         public override async Task OnConnectedAsync()
         {
-            Console.WriteLine($"{Context.ConnectionId} connected.");
+            //Console.WriteLine($"{Context.ConnectionId} connected.");
 
             var feature = Context.GetHttpContext().Features.Get<IConnectionMigrationFeature>();
             if (feature != null)
             {
-                Console.WriteLine($"[{feature.MigrateTo}] {Context.ConnectionId} is migrated from {feature.MigrateFrom}.");
+                //Console.WriteLine($"[{feature.MigrateTo}] {Context.ConnectionId} is migrated from {feature.MigrateFrom}.");
             }
 
             await base.OnConnectedAsync();
@@ -49,12 +50,12 @@ namespace ChatSample.CoreApp3
 
         public override async Task OnDisconnectedAsync(Exception e)
         {
-            Console.WriteLine($"{Context.ConnectionId} disconnected.");
+            //Console.WriteLine($"{Context.ConnectionId} disconnected.");
 
             var feature = Context.GetHttpContext().Features.Get<IConnectionMigrationFeature>();
             if (feature != null)
             {
-                Console.WriteLine($"[{feature.MigrateFrom}] {Context.ConnectionId} will be migrated to {feature.MigrateTo}.");
+                //Console.WriteLine($"[{feature.MigrateFrom}] {Context.ConnectionId} will be migrated to {feature.MigrateTo}.");
             }
 
             await base.OnDisconnectedAsync(e);

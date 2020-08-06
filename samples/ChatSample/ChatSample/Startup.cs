@@ -14,12 +14,17 @@ namespace ChatSample.CoreApp3
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-            services.AddSignalR()
+            services.AddSignalR(options =>
+                {
+                    options.MaximumReceiveMessageSize = 100 * 1024 * 1024;
+
+                })
                 .AddAzureSignalR(option =>
                 {
                     option.GracefulShutdown.Mode = GracefulShutdownMode.WaitForClientsClose;
                     option.GracefulShutdown.Timeout = TimeSpan.FromSeconds(10);
-                    option.ConnectionCount = 0;
+                    option.ConnectionCount = 15;
+
                 })
                 .AddMessagePackProtocol();
         }
