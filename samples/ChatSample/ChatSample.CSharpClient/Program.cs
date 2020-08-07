@@ -33,16 +33,22 @@ namespace ChatSample.CSharpClient
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            Task.Run(async() =>
+            var threak = new Thread(() =>
             {
                 var stopwatch = new Stopwatch();
                 stopwatch.Start();
                 while (true)
                 {
-                    await Task.Delay(1000);
+                    Thread.Sleep(1000);
                     Console.WriteLine($"Messages rate:{_totalMessageCount * 1000 / stopwatch.ElapsedMilliseconds},  TTL={_totalTime / _totalMessageCount}");
+                    stopwatch.Restart();
+                    Interlocked.Exchange(ref _totalMessageCount, 1);
+                    Interlocked.Exchange(ref _totalTime, 1);
                 }
-            });
+            }){
+                IsBackground = true,
+            };
+            threak.Start();
             while (Interlocked.Read(ref _count) < _total)
             {
                 Console.WriteLine(Interlocked.Read(ref _count) + ": " + _total);
@@ -95,8 +101,8 @@ namespace ChatSample.CSharpClient
         {
             var startT = DateTime.Now;
             var connection = new HubConnectionBuilder()
-                // .WithUrl(url, HttpTransportType.LongPolling)
-                .WithUrl(url)
+                .WithUrl(url, HttpTransportType.LongPolling)
+                // .WithUrl(url)
                 .WithAutomaticReconnect()
                 .AddMessagePackProtocol().Build();
             
