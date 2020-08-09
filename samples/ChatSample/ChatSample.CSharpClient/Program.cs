@@ -101,7 +101,10 @@ namespace ChatSample.CSharpClient
         {
             var startT = DateTime.Now;
             var connection = new HubConnectionBuilder()
-                .WithUrl(url, HttpTransportType.LongPolling)
+                .WithUrl(url, options => {
+                    options.Transports = HttpTransportType.LongPolling;
+                    options.Headers["Connection"] = "close";
+                })
                 // .WithUrl(url)
                 .WithAutomaticReconnect()
                 .AddMessagePackProtocol().Build();
